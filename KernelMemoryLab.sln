@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.SingleMemor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.BatchMemoryClient", "tests\ManualVm\KernelMemoryLab.BatchMemoryClient\KernelMemoryLab.BatchMemoryClient.csproj", "{EAF4E58B-4557-4DBA-9CD3-FBE14506C5BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.Controller.Tests", "tests\Unit\KernelMemoryLab.Controller.Tests\KernelMemoryLab.Controller.Tests.csproj", "{4A82F15E-7302-49A9-93C8-71E0484B0F0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -62,6 +64,10 @@ Global
 		{EAF4E58B-4557-4DBA-9CD3-FBE14506C5BF}.Debug|x64.Build.0 = Debug|x64
 		{EAF4E58B-4557-4DBA-9CD3-FBE14506C5BF}.Release|x64.ActiveCfg = Release|x64
 		{EAF4E58B-4557-4DBA-9CD3-FBE14506C5BF}.Release|x64.Build.0 = Release|x64
+		{4A82F15E-7302-49A9-93C8-71E0484B0F0C}.Debug|x64.ActiveCfg = Debug|x64
+		{4A82F15E-7302-49A9-93C8-71E0484B0F0C}.Debug|x64.Build.0 = Debug|x64
+		{4A82F15E-7302-49A9-93C8-71E0484B0F0C}.Release|x64.ActiveCfg = Release|x64
+		{4A82F15E-7302-49A9-93C8-71E0484B0F0C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

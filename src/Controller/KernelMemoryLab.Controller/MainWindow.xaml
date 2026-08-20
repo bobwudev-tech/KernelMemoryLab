@@ -1,15 +1,165 @@
 <Window x:Class="KernelMemoryLab.Controller.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:KernelMemoryLab.Controller.ViewModels"
         Title="KernelMemoryLab Controller"
-        Width="640"
-        Height="360"
+        Width="1120"
+        Height="780"
+        MinWidth="960"
+        MinHeight="680"
         WindowStartupLocation="CenterScreen">
-    <Grid>
-        <TextBlock HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="20"
-                   Text="KernelMemoryLab Controller — Phase 01 shell" />
+    <Window.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Padding" Value="10" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="MinWidth" Value="90" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="5" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="5" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Connection" Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Content="Connect" Click="ConnectClick" />
+                    <Button Content="Disconnect" Click="DisconnectClick" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontWeight="SemiBold"
+                           Text="{Binding ConnectionStatus}" />
+                <TextBlock Grid.Column="2" Margin="12,0,4,0" VerticalAlignment="Center" Text="Protocol:" />
+                <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding ProtocolVersion}" />
+                <TextBlock Grid.Column="4" Margin="12,0,4,0" VerticalAlignment="Center" Text="Driver:" />
+                <TextBlock Grid.Column="5" VerticalAlignment="Center" Text="{Binding DriverVersion}" />
+                <TextBlock Grid.Column="6" Margin="12,0,4,0" VerticalAlignment="Center" Text="Capabilities:" />
+                <TextBlock Grid.Column="7" VerticalAlignment="Center" Text="{Binding Capabilities}" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Controlled Target" Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Process name:" />
+                <TextBlock Grid.Column="1" Margin="8,0" VerticalAlignment="Center" FontWeight="SemiBold"
+                           Text="{Binding TargetProcessName}" />
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="PID:" />
+                <TextBox Grid.Column="3" Text="{Binding ProcessId, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Grid.Column="4" Margin="12,0,4,0" VerticalAlignment="Center" Text="Entered address:" />
+                <TextBox Grid.Column="5" Text="{Binding SingleAddress, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </GroupBox>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Grid.Column="0" Header="Single Read">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Type / Size:" />
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{x:Static local:ControllerViewModel.SupportedTypes}"
+                              SelectedItem="{Binding SelectedType}" />
+                    <Button Grid.Column="2" Content="Read" Click="ReadSingleClick" />
+                    <TextBox Grid.Column="3" IsReadOnly="True" Text="{Binding ReadResult}" />
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Column="2" Header="Single Write">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Value:" />
+                    <TextBox Grid.Column="1" Text="{Binding WriteValue, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="2" Content="Write" Click="WriteSingleClick" />
+                    <TextBox Grid.Column="3" IsReadOnly="True" Text="{Binding WriteResult}" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+
+        <GroupBox Header="Batch — same PID, controlled Target only" Grid.Row="3">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Read Batch" Click="ReadBatchClick" />
+                    <Button Content="Write Batch" Click="WriteBatchClick" />
+                </StackPanel>
+                <DataGrid ItemsSource="{Binding BatchRows}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          HeadersVisibility="Column"
+                          Margin="4">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Width="140" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Address" Width="220"
+                                            Binding="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridComboBoxColumn Header="Type" Width="120"
+                                                ItemsSource="{x:Static local:ControllerViewModel.SupportedTypes}"
+                                                SelectedItemBinding="{Binding Type, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTextColumn Header="Read Value" Width="150" IsReadOnly="True"
+                                            Binding="{Binding ReadValue}" />
+                        <DataGridTextColumn Header="Write Value" Width="150"
+                                            Binding="{Binding WriteValue, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTextColumn Header="Status" Width="*" IsReadOnly="True"
+                                            Binding="{Binding Status}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </GroupBox>
+
+        <GroupBox Header="Operation details" Grid.Row="4" Margin="0">
+            <TextBox IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     MinHeight="58"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding LastOperation}" />
+        </GroupBox>
     </Grid>
 </Window>
 

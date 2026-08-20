@@ -6,11 +6,13 @@ Phase 04 includes a manual-only single user-memory transport harness in `KernelM
 
 Phase 05 includes a manual-only batch user-memory transport harness in `KernelMemoryLab.BatchMemoryClient`.
 
+Phase 06 uses the real `KernelMemoryLab.Controller.exe` only during the user-run VM procedure.
+
 The Coding Agent may compile that project, but must never execute it because it opens the real device and calls `DeviceIoControl`.
 
 Any future driver integration procedure placed here must begin with:
 
 `MANUAL VM ONLY — DO NOT EXECUTE BY AGENT`
 
-See `Phase02_Ping_Checklist.md`, `Phase04_Single_ReadWrite_Checklist.md`, and `Phase05_Batch_ReadWrite_Checklist.md` for the user-run Windows 11 VM procedures.
+See the phase checklists in this directory, including `Phase06_Controller_API_Checklist.md`, for user-run Windows 11 VM procedures.
 

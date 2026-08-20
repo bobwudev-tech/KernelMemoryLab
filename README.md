@@ -118,3 +118,9 @@ Protocol 與狀態定義記錄於 `docs/Protocol_V1.md`。純 User-mode encoder/
 Phase 05 實作 flat inline `READ_BATCH` 與 `WRITE_BATCH`，一個 request 只能使用一個受控 `KernelMemoryLab.Target.exe` PID。上限為 128 items、每項 4096 bytes、aggregate payload 524288 bytes；所有 offset arithmetic 均受檢查，並回傳 per-item result 以及明確的 overall success／partial／all-failed 狀態。
 
 Wire format 與語意記錄於 `docs/Protocol_V1.md`，純 User-mode parser／serialization tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。真實 Driver batch acceptance 只能由使用者依 `tests/ManualVm/Phase05_Batch_ReadWrite_Checklist.md` 在 Windows 11 VM 手動驗證。
+
+## Phase 06 Controller and Driver API baseline
+
+Phase 06 將 Controller shell 完成為 WPF 操作介面，提供 connection/protocol/Driver 狀態、固定 Target PID/address 輸入、typed single read/write、五列 batch read/write，以及具 operation、Driver status、Win32 error、PID 與 timestamp 的錯誤資訊。
+
+UI 透過 `KernelMemoryApi` 呼叫可替換的 `IDriverTransport`，不直接組 raw IOCTL buffer。API 說明位於 `docs/API_Usage.md`；純 fake-transport tests 位於 `tests/Unit/KernelMemoryLab.Controller.Tests`。真實 Controller/Driver acceptance 只能由使用者依 `tests/ManualVm/Phase06_Controller_API_Checklist.md` 在 Windows 11 VM 手動驗證。
