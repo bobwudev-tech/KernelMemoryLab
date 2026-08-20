@@ -70,3 +70,23 @@ KernelMemoryLab.Controller.exe
 Coding Agent 不操作 VM，也不執行任何 Driver Integration Test。
 
 Driver 的安裝、載入、IOCTL 驗證、Verifier 等均由使用者本人在 Windows 11 VM 手動完成。
+
+## Phase 01 build baseline
+
+Phase 01 已建立：
+
+- x64 KMDF Driver skeleton（無 device、IOCTL 或 memory R/W）。
+- x64 C# WPF Target 與 Controller 空殼。
+- Shared Protocol 專案位置（尚未定義完整 IOCTL）。
+- 僅 Restore／Build 的 PowerShell pipeline。
+
+需求：Visual Studio 的 C++ build tools、.NET Desktop build tools，以及相容的 Windows Driver Kit (WDK)。
+
+```powershell
+.\scripts\build.ps1 -Configuration Debug
+.\scripts\build.ps1 -Configuration Release
+```
+
+`build.ps1` 只會 Restore 與 Build；不會安裝 INF、建立服務、載入 Driver 或呼叫 `DeviceIoControl`。
+
+Phase 01 不要求任何手動 VM 測試。

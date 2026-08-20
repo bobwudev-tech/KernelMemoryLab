@@ -5,6 +5,8 @@
 *.suo
 *.userosscache
 *.sln.docstates
+*.VC.db
+*.VC.VC.opendb
 
 # Build outputs
 bin/

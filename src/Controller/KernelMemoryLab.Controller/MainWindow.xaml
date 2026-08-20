@@ -1,0 +1,15 @@
+<Window x:Class="KernelMemoryLab.Controller.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="KernelMemoryLab Controller"
+        Width="640"
+        Height="360"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <TextBlock HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="20"
+                   Text="KernelMemoryLab Controller — Phase 01 shell" />
+    </Grid>
+</Window>
+

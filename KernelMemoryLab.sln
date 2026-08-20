@@ -1,0 +1,40 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.12105.275
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "KernelMemoryLab.Driver", "src\Driver\KernelMemoryLab.Driver\KernelMemoryLab.Driver.vcxproj", "{3D1A7023-C8D9-48B4-9794-5F3F95D74C17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.Target", "src\Target\KernelMemoryLab.Target\KernelMemoryLab.Target.csproj", "{5B41C2B7-1B86-4A05-8A15-81E1136F632A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.Controller", "src\Controller\KernelMemoryLab.Controller\KernelMemoryLab.Controller.csproj", "{B342C508-6E75-465A-B489-550D3BFB23F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.Protocol", "src\Shared\KernelMemoryLab.Protocol\KernelMemoryLab.Protocol.csproj", "{0F3D4689-C0B4-45E0-9891-629269E18505}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D1A7023-C8D9-48B4-9794-5F3F95D74C17}.Debug|x64.ActiveCfg = Debug|x64
+		{3D1A7023-C8D9-48B4-9794-5F3F95D74C17}.Debug|x64.Build.0 = Debug|x64
+		{3D1A7023-C8D9-48B4-9794-5F3F95D74C17}.Release|x64.ActiveCfg = Release|x64
+		{3D1A7023-C8D9-48B4-9794-5F3F95D74C17}.Release|x64.Build.0 = Release|x64
+		{5B41C2B7-1B86-4A05-8A15-81E1136F632A}.Debug|x64.ActiveCfg = Debug|x64
+		{5B41C2B7-1B86-4A05-8A15-81E1136F632A}.Debug|x64.Build.0 = Debug|x64
+		{5B41C2B7-1B86-4A05-8A15-81E1136F632A}.Release|x64.ActiveCfg = Release|x64
+		{5B41C2B7-1B86-4A05-8A15-81E1136F632A}.Release|x64.Build.0 = Release|x64
+		{B342C508-6E75-465A-B489-550D3BFB23F8}.Debug|x64.ActiveCfg = Debug|x64
+		{B342C508-6E75-465A-B489-550D3BFB23F8}.Debug|x64.Build.0 = Debug|x64
+		{B342C508-6E75-465A-B489-550D3BFB23F8}.Release|x64.ActiveCfg = Release|x64
+		{B342C508-6E75-465A-B489-550D3BFB23F8}.Release|x64.Build.0 = Release|x64
+		{0F3D4689-C0B4-45E0-9891-629269E18505}.Debug|x64.ActiveCfg = Debug|x64
+		{0F3D4689-C0B4-45E0-9891-629269E18505}.Debug|x64.Build.0 = Debug|x64
+		{0F3D4689-C0B4-45E0-9891-629269E18505}.Release|x64.ActiveCfg = Release|x64
+		{0F3D4689-C0B4-45E0-9891-629269E18505}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
