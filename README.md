@@ -98,3 +98,9 @@ Phase 02 固定 Protocol `1.0`，並實作 `GET_PROTOCOL_VERSION`、`GET_CAPABIL
 Protocol wire layout、limits 與 IOCTL constants 記錄於 `docs/Protocol_V1.md`。純 User-mode protocol tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。
 
 Driver 的實際 PING 驗證只能由使用者依 `tests/ManualVm/Phase02_Ping_Checklist.md` 在 Windows 11 VM 手動執行。
+
+## Phase 03 target baseline
+
+Phase 03 建立獨立於 Driver 的 x64 WPF Target。程式啟動時配置一個 lifecycle-stable unmanaged memory block，包含 Health、Mana、Gold、PositionX 與 PositionY；UI 每秒直接從 unmanaged memory 重新讀取並顯示值與地址。
+
+固定 layout 記錄於 `docs/Target_Memory_Layout.md`。純 User-mode 的 layout、自我讀寫、非快取刷新與地址穩定性測試位於 `tests/Unit/KernelMemoryLab.Target.Tests`。
