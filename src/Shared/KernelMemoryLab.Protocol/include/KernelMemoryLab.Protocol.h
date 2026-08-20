@@ -7,7 +7,7 @@
 #define KML_PROTOCOL_VERSION_MINOR 0u
 
 #define KML_DRIVER_VERSION_MAJOR 0u
-#define KML_DRIVER_VERSION_MINOR 4u
+#define KML_DRIVER_VERSION_MINOR 5u
 #define KML_DRIVER_VERSION_BUILD 0u
 #define KML_DRIVER_VERSION_REVISION 0u
 
@@ -32,6 +32,11 @@
     (KML_PHASE02_CAPABILITIES | \
      KML_CAPABILITY_READ_SINGLE | \
      KML_CAPABILITY_WRITE_SINGLE)
+
+#define KML_PHASE05_CAPABILITIES \
+    (KML_PHASE04_CAPABILITIES | \
+     KML_CAPABILITY_READ_BATCH | \
+     KML_CAPABILITY_WRITE_BATCH)
 
 #define KML_IOCTL_FUNCTION_GET_PROTOCOL_VERSION 0x800u
 #define KML_IOCTL_FUNCTION_GET_CAPABILITIES     0x801u
@@ -78,7 +83,11 @@ typedef enum _KML_OPERATION_STATUS {
     KmlOperationKernelRangeDenied = 15,
     KmlOperationMemoryNotAccessible = 16,
     KmlOperationPartialTransfer = 17,
-    KmlOperationTargetExited = 18
+    KmlOperationTargetExited = 18,
+    KmlOperationInvalidItemCount = 19,
+    KmlOperationInvalidOffset = 20,
+    KmlOperationAggregateLimitExceeded = 21,
+    KmlOperationAllItemsFailed = 22
 } KML_OPERATION_STATUS;
 
 #pragma pack(push, 1)
@@ -165,6 +174,59 @@ typedef struct _KML_WRITE_SINGLE_REQUEST {
 typedef struct _KML_WRITE_SINGLE_RESPONSE {
     KML_COMMON_RESPONSE_HEADER Header;
 } KML_WRITE_SINGLE_RESPONSE, *PKML_WRITE_SINGLE_RESPONSE;
+
+typedef struct _KML_READ_BATCH_REQUEST_HEADER {
+    KML_COMMON_REQUEST_HEADER Header;
+    UINT32 TargetProcessId;
+    UINT32 ItemCount;
+    UINT32 ItemsOffset;
+    UINT32 Reserved;
+} KML_READ_BATCH_REQUEST_HEADER, *PKML_READ_BATCH_REQUEST_HEADER;
+
+typedef struct _KML_READ_BATCH_ITEM {
+    UINT64 Address;
+    UINT32 Size;
+    UINT32 ResultOffset;
+} KML_READ_BATCH_ITEM, *PKML_READ_BATCH_ITEM;
+
+typedef struct _KML_READ_BATCH_RESPONSE_HEADER {
+    KML_COMMON_RESPONSE_HEADER Header;
+    UINT32 ItemCount;
+    UINT32 ResultsOffset;
+    UINT32 DataOffset;
+    UINT32 DataSize;
+} KML_READ_BATCH_RESPONSE_HEADER, *PKML_READ_BATCH_RESPONSE_HEADER;
+
+typedef struct _KML_WRITE_BATCH_REQUEST_HEADER {
+    KML_COMMON_REQUEST_HEADER Header;
+    UINT32 TargetProcessId;
+    UINT32 ItemCount;
+    UINT32 ItemsOffset;
+    UINT32 DataOffset;
+    UINT32 DataSize;
+    UINT32 Reserved;
+} KML_WRITE_BATCH_REQUEST_HEADER, *PKML_WRITE_BATCH_REQUEST_HEADER;
+
+typedef struct _KML_WRITE_BATCH_ITEM {
+    UINT64 Address;
+    UINT32 Size;
+    UINT32 DataOffset;
+} KML_WRITE_BATCH_ITEM, *PKML_WRITE_BATCH_ITEM;
+
+typedef struct _KML_WRITE_BATCH_RESPONSE_HEADER {
+    KML_COMMON_RESPONSE_HEADER Header;
+    UINT32 ItemCount;
+    UINT32 ResultsOffset;
+} KML_WRITE_BATCH_RESPONSE_HEADER, *PKML_WRITE_BATCH_RESPONSE_HEADER;
+
+typedef struct _KML_BATCH_ITEM_RESULT {
+    UINT32 OperationStatus;
+    UINT32 BytesProcessed;
+    UINT32 DataOffset;
+    UINT32 RequestedSize;
+    UINT32 DetailStatus;
+    UINT32 Reserved;
+} KML_BATCH_ITEM_RESULT, *PKML_BATCH_ITEM_RESULT;
 
 #pragma pack(pop)
 

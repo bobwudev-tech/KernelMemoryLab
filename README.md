@@ -107,8 +107,14 @@ Phase 03 建立獨立於 Driver 的 x64 WPF Target。程式啟動時配置一個
 
 ## Phase 04 single read/write baseline
 
-Phase 04 實作 `READ_SINGLE` 與 `WRITE_SINGLE`，僅允許 image basename 為 `KernelMemoryLab.Target.exe` 的受控 User Process。Driver 在存取前驗證 PID、process lifecycle、完整 user address range、4096-byte 上限、overflow 與 kernel-range boundary；Batch IOCTL 仍未實作。
+Phase 04 實作 `READ_SINGLE` 與 `WRITE_SINGLE`，僅允許 image basename 為 `KernelMemoryLab.Target.exe` 的受控 User Process。Driver 在存取前驗證 PID、process lifecycle、完整 user address range、4096-byte 上限、overflow 與 kernel-range boundary。
 
 Protocol 與狀態定義記錄於 `docs/Protocol_V1.md`。純 User-mode encoder/decoder 與 range validation tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。
 
 真實 Driver single R/W 只能由使用者依 `tests/ManualVm/Phase04_Single_ReadWrite_Checklist.md` 在 Windows 11 VM 手動驗證。
+
+## Phase 05 batch read/write baseline
+
+Phase 05 實作 flat inline `READ_BATCH` 與 `WRITE_BATCH`，一個 request 只能使用一個受控 `KernelMemoryLab.Target.exe` PID。上限為 128 items、每項 4096 bytes、aggregate payload 524288 bytes；所有 offset arithmetic 均受檢查，並回傳 per-item result 以及明確的 overall success／partial／all-failed 狀態。
+
+Wire format 與語意記錄於 `docs/Protocol_V1.md`，純 User-mode parser／serialization tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。真實 Driver batch acceptance 只能由使用者依 `tests/ManualVm/Phase05_Batch_ReadWrite_Checklist.md` 在 Windows 11 VM 手動驗證。

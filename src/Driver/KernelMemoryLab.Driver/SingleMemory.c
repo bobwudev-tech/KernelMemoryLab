@@ -1,32 +1,9 @@
 #include "KernelMemoryLab.Driver.h"
 
-static KML_OPERATION_STATUS
-KmlValidateSingleRange(
-    UINT32 targetProcessId,
-    UINT64 address,
-    UINT32 size);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-static KML_OPERATION_STATUS
-KmlAcquireAllowedTargetProcess(
-    UINT32 targetProcessId,
-    PEPROCESS* process);
-
 _IRQL_requires_(PASSIVE_LEVEL)
 static BOOLEAN
 KmlProcessImageIsAllowed(
     PEPROCESS process);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-static KML_OPERATION_STATUS
-KmlTransferTargetMemory(
-    PEPROCESS process,
-    UINT64 address,
-    PVOID buffer,
-    UINT32 size,
-    BOOLEAN writeToTarget,
-    UINT32* bytesTransferred,
-    NTSTATUS* detailStatus);
 
 static VOID
 KmlCompleteSingleRequest(
@@ -96,7 +73,7 @@ KmlHandleReadSingle(
     }
 
     if (operationStatus == KmlOperationSuccess) {
-        operationStatus = KmlValidateSingleRange(
+        operationStatus = KmlValidateMemoryRange(
             localRequest.TargetProcessId,
             localRequest.Address,
             localRequest.Size);
@@ -203,7 +180,7 @@ KmlHandleWriteSingle(
     operationStatus = KmlValidateRequestHeaderFields(&localRequest.Header);
 
     if (operationStatus == KmlOperationSuccess) {
-        operationStatus = KmlValidateSingleRange(
+        operationStatus = KmlValidateMemoryRange(
             localRequest.TargetProcessId,
             localRequest.Address,
             localRequest.Size);
@@ -250,8 +227,8 @@ KmlHandleWriteSingle(
         sizeof(*output));
 }
 
-static KML_OPERATION_STATUS
-KmlValidateSingleRange(
+KML_OPERATION_STATUS
+KmlValidateMemoryRange(
     UINT32 targetProcessId,
     UINT64 address,
     UINT32 size)
@@ -294,7 +271,7 @@ KmlValidateSingleRange(
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
-static KML_OPERATION_STATUS
+KML_OPERATION_STATUS
 KmlAcquireAllowedTargetProcess(
     UINT32 targetProcessId,
     PEPROCESS* process)
@@ -391,7 +368,7 @@ KmlProcessImageIsAllowed(
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
-static KML_OPERATION_STATUS
+KML_OPERATION_STATUS
 KmlTransferTargetMemory(
     PEPROCESS process,
     UINT64 address,

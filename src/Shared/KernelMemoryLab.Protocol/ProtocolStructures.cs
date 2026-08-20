@@ -153,3 +153,70 @@ public struct WriteSingleResponse
     public CommonResponseHeader Header;
 }
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct ReadBatchRequestHeader
+{
+    public CommonRequestHeader Header;
+    public uint TargetProcessId;
+    public uint ItemCount;
+    public uint ItemsOffset;
+    public uint Reserved;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct ReadBatchItem
+{
+    public ulong Address;
+    public uint Size;
+    public uint ResultOffset;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct ReadBatchResponseHeader
+{
+    public CommonResponseHeader Header;
+    public uint ItemCount;
+    public uint ResultsOffset;
+    public uint DataOffset;
+    public uint DataSize;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct WriteBatchRequestHeader
+{
+    public CommonRequestHeader Header;
+    public uint TargetProcessId;
+    public uint ItemCount;
+    public uint ItemsOffset;
+    public uint DataOffset;
+    public uint DataSize;
+    public uint Reserved;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct WriteBatchItem
+{
+    public ulong Address;
+    public uint Size;
+    public uint DataOffset;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct WriteBatchResponseHeader
+{
+    public CommonResponseHeader Header;
+    public uint ItemCount;
+    public uint ResultsOffset;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct BatchItemResult
+{
+    public OperationStatus OperationStatus;
+    public uint BytesProcessed;
+    public uint DataOffset;
+    public uint RequestedSize;
+    public uint DetailStatus;
+    public uint Reserved;
+}
+

@@ -34,6 +34,10 @@ public enum OperationStatus : uint
     MemoryNotAccessible = 16,
     PartialTransfer = 17,
     TargetExited = 18,
+    InvalidItemCount = 19,
+    InvalidOffset = 20,
+    AggregateLimitExceeded = 21,
+    AllItemsFailed = 22,
 }
 
 [Flags]
@@ -48,7 +52,7 @@ public enum ProtocolCapabilities : ulong
     ReadSingle = 1UL << 8,
     WriteSingle = 1UL << 9,
 
-    // Batch operations remain reserved until Phase 05.
+    // Batch operations are enabled in Phase 05.
     ReadBatch = 1UL << 10,
     WriteBatch = 1UL << 11,
 }

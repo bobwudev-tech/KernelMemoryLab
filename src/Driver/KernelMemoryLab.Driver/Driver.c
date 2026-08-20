@@ -23,9 +23,17 @@ C_ASSERT(sizeof(KML_READ_SINGLE_REQUEST) == 32);
 C_ASSERT(KML_READ_SINGLE_RESPONSE_HEADER_SIZE == 16);
 C_ASSERT(KML_WRITE_SINGLE_REQUEST_HEADER_SIZE == 32);
 C_ASSERT(sizeof(KML_WRITE_SINGLE_RESPONSE) == 16);
+C_ASSERT(sizeof(KML_READ_BATCH_REQUEST_HEADER) == 32);
+C_ASSERT(sizeof(KML_READ_BATCH_ITEM) == 16);
+C_ASSERT(sizeof(KML_READ_BATCH_RESPONSE_HEADER) == 32);
+C_ASSERT(sizeof(KML_WRITE_BATCH_REQUEST_HEADER) == 40);
+C_ASSERT(sizeof(KML_WRITE_BATCH_ITEM) == 16);
+C_ASSERT(sizeof(KML_WRITE_BATCH_RESPONSE_HEADER) == 24);
+C_ASSERT(sizeof(KML_BATCH_ITEM_RESULT) == 24);
 C_ASSERT(KML_MAX_BATCH_PAYLOAD_SIZE == 524288u);
 C_ASSERT(KML_PHASE02_CAPABILITIES == 0x0000000000000007ull);
 C_ASSERT(KML_PHASE04_CAPABILITIES == 0x0000000000000307ull);
+C_ASSERT(KML_PHASE05_CAPABILITIES == 0x0000000000000F07ull);
 C_ASSERT(IOCTL_KML_GET_PROTOCOL_VERSION == 0x0022E000u);
 C_ASSERT(IOCTL_KML_GET_CAPABILITIES == 0x0022E004u);
 C_ASSERT(IOCTL_KML_PING == 0x0022E008u);
@@ -198,8 +206,17 @@ KmlEvtIoDeviceControl(
         break;
 
     case IOCTL_KML_READ_BATCH:
+        KmlHandleReadBatch(
+            request,
+            inputBufferLength,
+            outputBufferLength);
+        break;
+
     case IOCTL_KML_WRITE_BATCH:
-        WdfRequestComplete(request, STATUS_NOT_SUPPORTED);
+        KmlHandleWriteBatch(
+            request,
+            inputBufferLength,
+            outputBufferLength);
         break;
 
     default:
@@ -282,6 +299,13 @@ KmlOperationStatusToNtStatus(
         return STATUS_PARTIAL_COPY;
     case KmlOperationTargetExited:
         return STATUS_PROCESS_IS_TERMINATING;
+    case KmlOperationInvalidItemCount:
+    case KmlOperationInvalidOffset:
+        return STATUS_INVALID_PARAMETER;
+    case KmlOperationAggregateLimitExceeded:
+        return STATUS_BUFFER_OVERFLOW;
+    case KmlOperationAllItemsFailed:
+        return STATUS_UNSUCCESSFUL;
     default:
         return STATUS_INTERNAL_ERROR;
     }
@@ -399,7 +423,7 @@ KmlHandleGetCapabilities(
     KmlInitializeResponseHeader(&output->Header, operationStatus, 0u);
 
     if (operationStatus == KmlOperationSuccess) {
-        output->Capabilities = KML_PHASE04_CAPABILITIES;
+        output->Capabilities = KML_PHASE05_CAPABILITIES;
         output->MaxSingleItemSize = KML_MAX_SINGLE_ITEM_SIZE;
         output->MaxBatchItems = KML_MAX_BATCH_ITEMS;
         output->MaxBatchPayloadSize = KML_MAX_BATCH_PAYLOAD_SIZE;
@@ -474,7 +498,7 @@ KmlHandlePing(
         output->DriverVersion.Minor = KML_DRIVER_VERSION_MINOR;
         output->DriverVersion.Build = KML_DRIVER_VERSION_BUILD;
         output->DriverVersion.Revision = KML_DRIVER_VERSION_REVISION;
-        output->Capabilities = KML_PHASE04_CAPABILITIES;
+        output->Capabilities = KML_PHASE05_CAPABILITIES;
         output->EchoToken = pingRequest.Token;
     }
 

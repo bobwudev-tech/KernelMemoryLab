@@ -83,6 +83,7 @@
     </DriverSign>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BatchMemory.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="SingleMemory.c" />
   </ItemGroup>
