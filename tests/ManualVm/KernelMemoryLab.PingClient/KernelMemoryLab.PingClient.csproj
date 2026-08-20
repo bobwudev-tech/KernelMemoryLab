@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Platforms>x64</Platforms>
@@ -8,11 +9,12 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyName>KernelMemoryLab.Protocol</AssemblyName>
-    <RootNamespace>KernelMemoryLab.Protocol</RootNamespace>
+    <NoWarn>$(NoWarn);SYSLIB1054</NoWarn>
+    <AssemblyName>KernelMemoryLab.PingClient</AssemblyName>
+    <RootNamespace>KernelMemoryLab.PingClient</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="include\KernelMemoryLab.Protocol.h" />
+    <ProjectReference Include="..\..\..\src\Shared\KernelMemoryLab.Protocol\KernelMemoryLab.Protocol.csproj" />
   </ItemGroup>
 </Project>
 

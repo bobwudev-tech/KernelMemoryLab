@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,11 +9,11 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyName>KernelMemoryLab.Protocol</AssemblyName>
-    <RootNamespace>KernelMemoryLab.Protocol</RootNamespace>
+    <AssemblyName>KernelMemoryLab.Protocol.Tests</AssemblyName>
+    <RootNamespace>KernelMemoryLab.Protocol.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="include\KernelMemoryLab.Protocol.h" />
+    <ProjectReference Include="..\..\..\src\Shared\KernelMemoryLab.Protocol\KernelMemoryLab.Protocol.csproj" />
   </ItemGroup>
 </Project>
 

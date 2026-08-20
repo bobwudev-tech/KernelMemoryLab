@@ -90,3 +90,11 @@ Phase 01 已建立：
 `build.ps1` 只會 Restore 與 Build；不會安裝 INF、建立服務、載入 Driver 或呼叫 `DeviceIoControl`。
 
 Phase 01 不要求任何手動 VM 測試。
+
+## Phase 02 protocol baseline
+
+Phase 02 固定 Protocol `1.0`，並實作 `GET_PROTOCOL_VERSION`、`GET_CAPABILITIES` 與 `PING`。Single／Batch R/W 只有保留 IOCTL code，尚未實作且不會出現在 capabilities 中。
+
+Protocol wire layout、limits 與 IOCTL constants 記錄於 `docs/Protocol_V1.md`。純 User-mode protocol tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。
+
+Driver 的實際 PING 驗證只能由使用者依 `tests/ManualVm/Phase02_Ping_Checklist.md` 在 Windows 11 VM 手動執行。
