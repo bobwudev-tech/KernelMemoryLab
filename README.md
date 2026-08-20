@@ -104,3 +104,11 @@ Driver 的實際 PING 驗證只能由使用者依 `tests/ManualVm/Phase02_Ping_C
 Phase 03 建立獨立於 Driver 的 x64 WPF Target。程式啟動時配置一個 lifecycle-stable unmanaged memory block，包含 Health、Mana、Gold、PositionX 與 PositionY；UI 每秒直接從 unmanaged memory 重新讀取並顯示值與地址。
 
 固定 layout 記錄於 `docs/Target_Memory_Layout.md`。純 User-mode 的 layout、自我讀寫、非快取刷新與地址穩定性測試位於 `tests/Unit/KernelMemoryLab.Target.Tests`。
+
+## Phase 04 single read/write baseline
+
+Phase 04 實作 `READ_SINGLE` 與 `WRITE_SINGLE`，僅允許 image basename 為 `KernelMemoryLab.Target.exe` 的受控 User Process。Driver 在存取前驗證 PID、process lifecycle、完整 user address range、4096-byte 上限、overflow 與 kernel-range boundary；Batch IOCTL 仍未實作。
+
+Protocol 與狀態定義記錄於 `docs/Protocol_V1.md`。純 User-mode encoder/decoder 與 range validation tests 位於 `tests/Unit/KernelMemoryLab.Protocol.Tests`。
+
+真實 Driver single R/W 只能由使用者依 `tests/ManualVm/Phase04_Single_ReadWrite_Checklist.md` 在 Windows 11 VM 手動驗證。

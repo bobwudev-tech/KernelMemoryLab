@@ -16,13 +16,24 @@ public enum ProtocolOperation : uint
 public enum OperationStatus : uint
 {
     Success = 0,
-    UnsupportedProtocolVersion = 1,
+    ProtocolMismatch = 1,
     InvalidStructureSize = 2,
     InvalidFlags = 3,
     InvalidReservedField = 4,
     UnsupportedOperation = 5,
     BufferTooSmall = 6,
     InternalError = 7,
+    InvalidRequest = 8,
+    InvalidPid = 9,
+    TargetNotFound = 10,
+    TargetNotAllowed = 11,
+    InvalidAddress = 12,
+    InvalidSize = 13,
+    AddressRangeOverflow = 14,
+    KernelRangeDenied = 15,
+    MemoryNotAccessible = 16,
+    PartialTransfer = 17,
+    TargetExited = 18,
 }
 
 [Flags]
@@ -33,9 +44,11 @@ public enum ProtocolCapabilities : ulong
     GetCapabilities = 1UL << 1,
     Ping = 1UL << 2,
 
-    // These bits are reserved and are intentionally not returned in Phase 02.
+    // Single-item operations are enabled in Phase 04.
     ReadSingle = 1UL << 8,
     WriteSingle = 1UL << 9,
+
+    // Batch operations remain reserved until Phase 05.
     ReadBatch = 1UL << 10,
     WriteBatch = 1UL << 11,
 }

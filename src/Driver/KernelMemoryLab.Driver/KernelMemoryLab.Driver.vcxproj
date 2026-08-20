@@ -84,8 +84,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="SingleMemory.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="KernelMemoryLab.Driver.h" />
     <ClInclude Include="..\..\Shared\KernelMemoryLab.Protocol\include\KernelMemoryLab.Protocol.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

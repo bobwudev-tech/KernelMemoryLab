@@ -104,7 +104,7 @@ internal static class Program
         return RunPingRequest(
             device,
             request,
-            OperationStatus.UnsupportedProtocolVersion);
+            OperationStatus.ProtocolMismatch);
     }
 
     private static int RunMalformedSize(SafeFileHandle device)

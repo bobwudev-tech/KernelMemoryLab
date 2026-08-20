@@ -36,10 +36,10 @@ sc.exe query KernelMemoryLab
 ```
 
 - [ ] Protocol version 為 `1.0`。
-- [ ] Capabilities mask 為 `0x0000000000000007`。
+- [ ] 目前 Phase 04 build 的 capabilities mask 為 `0x0000000000000307`（若驗證歷史 Phase 02 artifact，則為 `0x0000000000000007`）。
 - [ ] Limits 為 single `4096`、batch items `128`、aggregate `524288`。
 - [ ] PING status 為 `Success`。
-- [ ] Driver version 為 `0.2.0.0`。
+- [ ] 目前 Phase 04 Driver version 為 `0.4.0.0`（歷史 Phase 02 artifact 為 `0.2.0.0`）。
 - [ ] Echo token 為 `0x0123456789ABCDEF`。
 
 ## Negative checks
@@ -51,7 +51,7 @@ sc.exe query KernelMemoryLab
 & "C:\KernelMemoryLab\KernelMemoryLab.PingClient.exe" malformed-size
 ```
 
-- [ ] Version mismatch 回傳 `UnsupportedProtocolVersion`。
+- [ ] Version mismatch 回傳 `ProtocolMismatch`。
 - [ ] Malformed structure 回傳 `InvalidStructureSize`。
 - [ ] 兩項錯誤輸入均安全失敗，沒有 BSOD。
 

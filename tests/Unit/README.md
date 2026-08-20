@@ -1,6 +1,6 @@
 # Unit tests
 
-`KernelMemoryLab.Protocol.Tests` is a dependency-free, pure user-mode test executable for protocol structure sizes, IOCTL constants, limits, and serialization.
+`KernelMemoryLab.Protocol.Tests` is a dependency-free, pure user-mode test executable for protocol structure sizes, IOCTL constants, limits, serialization, single-request range validation, and single-message encoding/decoding.
 
 `KernelMemoryLab.Target.Tests` is a dependency-free, pure user-mode test executable for the Target unmanaged layout, initial values, self-memory reads/writes, non-cached UI refresh behavior, disposal, and address stability.
 

@@ -9,7 +9,7 @@ public static class ProtocolConstants
     public const ushort ProtocolMinor = 0;
 
     public const ushort DriverMajor = 0;
-    public const ushort DriverMinor = 2;
+    public const ushort DriverMinor = 4;
     public const ushort DriverBuild = 0;
     public const ushort DriverRevision = 0;
 
@@ -21,6 +21,11 @@ public static class ProtocolConstants
         ProtocolCapabilities.GetProtocolVersion |
         ProtocolCapabilities.GetCapabilities |
         ProtocolCapabilities.Ping;
+
+    public const ProtocolCapabilities Phase04Capabilities =
+        Phase02Capabilities |
+        ProtocolCapabilities.ReadSingle |
+        ProtocolCapabilities.WriteSingle;
 
     public const string DevicePath = @"\\.\KernelMemoryLab";
 

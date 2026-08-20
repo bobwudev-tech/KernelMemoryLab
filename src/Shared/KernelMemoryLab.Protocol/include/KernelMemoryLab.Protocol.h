@@ -7,7 +7,7 @@
 #define KML_PROTOCOL_VERSION_MINOR 0u
 
 #define KML_DRIVER_VERSION_MAJOR 0u
-#define KML_DRIVER_VERSION_MINOR 2u
+#define KML_DRIVER_VERSION_MINOR 4u
 #define KML_DRIVER_VERSION_BUILD 0u
 #define KML_DRIVER_VERSION_REVISION 0u
 
@@ -27,6 +27,11 @@
     (KML_CAPABILITY_GET_PROTOCOL_VERSION | \
      KML_CAPABILITY_GET_CAPABILITIES | \
      KML_CAPABILITY_PING)
+
+#define KML_PHASE04_CAPABILITIES \
+    (KML_PHASE02_CAPABILITIES | \
+     KML_CAPABILITY_READ_SINGLE | \
+     KML_CAPABILITY_WRITE_SINGLE)
 
 #define KML_IOCTL_FUNCTION_GET_PROTOCOL_VERSION 0x800u
 #define KML_IOCTL_FUNCTION_GET_CAPABILITIES     0x801u
@@ -56,13 +61,24 @@
 
 typedef enum _KML_OPERATION_STATUS {
     KmlOperationSuccess = 0,
-    KmlOperationUnsupportedProtocolVersion = 1,
+    KmlOperationProtocolMismatch = 1,
     KmlOperationInvalidStructureSize = 2,
     KmlOperationInvalidFlags = 3,
     KmlOperationInvalidReservedField = 4,
     KmlOperationUnsupportedOperation = 5,
     KmlOperationBufferTooSmall = 6,
-    KmlOperationInternalError = 7
+    KmlOperationInternalError = 7,
+    KmlOperationInvalidRequest = 8,
+    KmlOperationInvalidPid = 9,
+    KmlOperationTargetNotFound = 10,
+    KmlOperationTargetNotAllowed = 11,
+    KmlOperationInvalidAddress = 12,
+    KmlOperationInvalidSize = 13,
+    KmlOperationAddressRangeOverflow = 14,
+    KmlOperationKernelRangeDenied = 15,
+    KmlOperationMemoryNotAccessible = 16,
+    KmlOperationPartialTransfer = 17,
+    KmlOperationTargetExited = 18
 } KML_OPERATION_STATUS;
 
 #pragma pack(push, 1)
@@ -126,5 +142,34 @@ typedef struct _KML_PING_RESPONSE {
     UINT64 EchoToken;
 } KML_PING_RESPONSE, *PKML_PING_RESPONSE;
 
+typedef struct _KML_READ_SINGLE_REQUEST {
+    KML_COMMON_REQUEST_HEADER Header;
+    UINT32 TargetProcessId;
+    UINT32 Size;
+    UINT64 Address;
+} KML_READ_SINGLE_REQUEST, *PKML_READ_SINGLE_REQUEST;
+
+typedef struct _KML_READ_SINGLE_RESPONSE {
+    KML_COMMON_RESPONSE_HEADER Header;
+    UCHAR Data[ANYSIZE_ARRAY];
+} KML_READ_SINGLE_RESPONSE, *PKML_READ_SINGLE_RESPONSE;
+
+typedef struct _KML_WRITE_SINGLE_REQUEST {
+    KML_COMMON_REQUEST_HEADER Header;
+    UINT32 TargetProcessId;
+    UINT32 Size;
+    UINT64 Address;
+    UCHAR Data[ANYSIZE_ARRAY];
+} KML_WRITE_SINGLE_REQUEST, *PKML_WRITE_SINGLE_REQUEST;
+
+typedef struct _KML_WRITE_SINGLE_RESPONSE {
+    KML_COMMON_RESPONSE_HEADER Header;
+} KML_WRITE_SINGLE_RESPONSE, *PKML_WRITE_SINGLE_RESPONSE;
+
 #pragma pack(pop)
+
+#define KML_READ_SINGLE_RESPONSE_HEADER_SIZE \
+    FIELD_OFFSET(KML_READ_SINGLE_RESPONSE, Data)
+#define KML_WRITE_SINGLE_REQUEST_HEADER_SIZE \
+    FIELD_OFFSET(KML_WRITE_SINGLE_REQUEST, Data)
 

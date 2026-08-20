@@ -1,8 +1,6 @@
-#include <ntddk.h>
-#include <wdf.h>
-#include <wdmsec.h>
+#include "KernelMemoryLab.Driver.h"
 
-#include "KernelMemoryLab.Protocol.h"
+#include <wdmsec.h>
 
 #define KML_NT_DEVICE_NAME L"\\Device\\KernelMemoryLab"
 #define KML_DOS_DEVICE_NAME L"\\DosDevices\\KernelMemoryLab"
@@ -21,8 +19,13 @@ C_ASSERT(sizeof(KML_GET_CAPABILITIES_REQUEST) == 16);
 C_ASSERT(sizeof(KML_GET_CAPABILITIES_RESPONSE) == 40);
 C_ASSERT(sizeof(KML_PING_REQUEST) == 24);
 C_ASSERT(sizeof(KML_PING_RESPONSE) == 40);
+C_ASSERT(sizeof(KML_READ_SINGLE_REQUEST) == 32);
+C_ASSERT(KML_READ_SINGLE_RESPONSE_HEADER_SIZE == 16);
+C_ASSERT(KML_WRITE_SINGLE_REQUEST_HEADER_SIZE == 32);
+C_ASSERT(sizeof(KML_WRITE_SINGLE_RESPONSE) == 16);
 C_ASSERT(KML_MAX_BATCH_PAYLOAD_SIZE == 524288u);
 C_ASSERT(KML_PHASE02_CAPABILITIES == 0x0000000000000007ull);
+C_ASSERT(KML_PHASE04_CAPABILITIES == 0x0000000000000307ull);
 C_ASSERT(IOCTL_KML_GET_PROTOCOL_VERSION == 0x0022E000u);
 C_ASSERT(IOCTL_KML_GET_CAPABILITIES == 0x0022E004u);
 C_ASSERT(IOCTL_KML_PING == 0x0022E008u);
@@ -32,18 +35,6 @@ C_ASSERT(IOCTL_KML_READ_BATCH == 0x0022E048u);
 C_ASSERT(IOCTL_KML_WRITE_BATCH == 0x0022E04Cu);
 
 static NTSTATUS KmlCreateControlDevice(WDFDRIVER driver);
-
-static KML_OPERATION_STATUS KmlValidateRequestHeader(
-    const KML_COMMON_REQUEST_HEADER* header,
-    UINT32 expectedStructureSize);
-
-static NTSTATUS KmlOperationStatusToNtStatus(
-    KML_OPERATION_STATUS operationStatus);
-
-static VOID KmlInitializeResponseHeader(
-    KML_COMMON_RESPONSE_HEADER* header,
-    KML_OPERATION_STATUS operationStatus,
-    UINT32 bytesProcessed);
 
 static VOID KmlHandleGetProtocolVersion(
     WDFREQUEST request,
@@ -104,6 +95,7 @@ KmlCreateControlDevice(
     DECLARE_CONST_UNICODE_STRING(symbolicLinkName, KML_DOS_DEVICE_NAME);
     PWDFDEVICE_INIT deviceInit;
     WDFDEVICE device;
+    WDF_OBJECT_ATTRIBUTES deviceAttributes;
     WDF_IO_QUEUE_CONFIG queueConfig;
     NTSTATUS status;
 
@@ -125,9 +117,12 @@ KmlCreateControlDevice(
         return status;
     }
 
+    WDF_OBJECT_ATTRIBUTES_INIT(&deviceAttributes);
+    deviceAttributes.ExecutionLevel = WdfExecutionLevelPassive;
+
     status = WdfDeviceCreate(
         &deviceInit,
-        WDF_NO_OBJECT_ATTRIBUTES,
+        &deviceAttributes,
         &device);
 
     if (!NT_SUCCESS(status)) {
@@ -175,8 +170,6 @@ KmlEvtIoDeviceControl(
 )
 {
     UNREFERENCED_PARAMETER(queue);
-    UNREFERENCED_PARAMETER(outputBufferLength);
-
     switch (ioControlCode) {
     case IOCTL_KML_GET_PROTOCOL_VERSION:
         KmlHandleGetProtocolVersion(request, inputBufferLength);
@@ -191,7 +184,19 @@ KmlEvtIoDeviceControl(
         break;
 
     case IOCTL_KML_READ_SINGLE:
+        KmlHandleReadSingle(
+            request,
+            inputBufferLength,
+            outputBufferLength);
+        break;
+
     case IOCTL_KML_WRITE_SINGLE:
+        KmlHandleWriteSingle(
+            request,
+            inputBufferLength,
+            outputBufferLength);
+        break;
+
     case IOCTL_KML_READ_BATCH:
     case IOCTL_KML_WRITE_BATCH:
         WdfRequestComplete(request, STATUS_NOT_SUPPORTED);
@@ -203,19 +208,13 @@ KmlEvtIoDeviceControl(
     }
 }
 
-static KML_OPERATION_STATUS
-KmlValidateRequestHeader(
-    const KML_COMMON_REQUEST_HEADER* header,
-    UINT32 expectedStructureSize
-)
+KML_OPERATION_STATUS
+KmlValidateRequestHeaderFields(
+    const KML_COMMON_REQUEST_HEADER* header)
 {
     if ((header->ProtocolVersion.Major != KML_PROTOCOL_VERSION_MAJOR) ||
         (header->ProtocolVersion.Minor != KML_PROTOCOL_VERSION_MINOR)) {
-        return KmlOperationUnsupportedProtocolVersion;
-    }
-
-    if (header->StructureSize != expectedStructureSize) {
-        return KmlOperationInvalidStructureSize;
+        return KmlOperationProtocolMismatch;
     }
 
     if (header->Flags != 0u) {
@@ -229,7 +228,25 @@ KmlValidateRequestHeader(
     return KmlOperationSuccess;
 }
 
-static NTSTATUS
+KML_OPERATION_STATUS
+KmlValidateRequestHeader(
+    const KML_COMMON_REQUEST_HEADER* header,
+    UINT32 expectedStructureSize
+)
+{
+    KML_OPERATION_STATUS operationStatus;
+
+    operationStatus = KmlValidateRequestHeaderFields(header);
+
+    if ((operationStatus == KmlOperationSuccess) &&
+        (header->StructureSize != expectedStructureSize)) {
+        operationStatus = KmlOperationInvalidStructureSize;
+    }
+
+    return operationStatus;
+}
+
+NTSTATUS
 KmlOperationStatusToNtStatus(
     KML_OPERATION_STATUS operationStatus
 )
@@ -237,23 +254,40 @@ KmlOperationStatusToNtStatus(
     switch (operationStatus) {
     case KmlOperationSuccess:
         return STATUS_SUCCESS;
-    case KmlOperationUnsupportedProtocolVersion:
+    case KmlOperationProtocolMismatch:
         return STATUS_REVISION_MISMATCH;
     case KmlOperationInvalidStructureSize:
         return STATUS_INFO_LENGTH_MISMATCH;
     case KmlOperationInvalidFlags:
     case KmlOperationInvalidReservedField:
+    case KmlOperationInvalidRequest:
+    case KmlOperationInvalidAddress:
+    case KmlOperationInvalidSize:
         return STATUS_INVALID_PARAMETER;
     case KmlOperationUnsupportedOperation:
         return STATUS_NOT_SUPPORTED;
     case KmlOperationBufferTooSmall:
         return STATUS_BUFFER_TOO_SMALL;
+    case KmlOperationInvalidPid:
+    case KmlOperationTargetNotFound:
+        return STATUS_INVALID_CID;
+    case KmlOperationTargetNotAllowed:
+    case KmlOperationKernelRangeDenied:
+        return STATUS_ACCESS_DENIED;
+    case KmlOperationAddressRangeOverflow:
+        return STATUS_INTEGER_OVERFLOW;
+    case KmlOperationMemoryNotAccessible:
+        return STATUS_ACCESS_VIOLATION;
+    case KmlOperationPartialTransfer:
+        return STATUS_PARTIAL_COPY;
+    case KmlOperationTargetExited:
+        return STATUS_PROCESS_IS_TERMINATING;
     default:
         return STATUS_INTERNAL_ERROR;
     }
 }
 
-static VOID
+VOID
 KmlInitializeResponseHeader(
     KML_COMMON_RESPONSE_HEADER* header,
     KML_OPERATION_STATUS operationStatus,
@@ -365,7 +399,7 @@ KmlHandleGetCapabilities(
     KmlInitializeResponseHeader(&output->Header, operationStatus, 0u);
 
     if (operationStatus == KmlOperationSuccess) {
-        output->Capabilities = KML_PHASE02_CAPABILITIES;
+        output->Capabilities = KML_PHASE04_CAPABILITIES;
         output->MaxSingleItemSize = KML_MAX_SINGLE_ITEM_SIZE;
         output->MaxBatchItems = KML_MAX_BATCH_ITEMS;
         output->MaxBatchPayloadSize = KML_MAX_BATCH_PAYLOAD_SIZE;
@@ -440,7 +474,7 @@ KmlHandlePing(
         output->DriverVersion.Minor = KML_DRIVER_VERSION_MINOR;
         output->DriverVersion.Build = KML_DRIVER_VERSION_BUILD;
         output->DriverVersion.Revision = KML_DRIVER_VERSION_REVISION;
-        output->Capabilities = KML_PHASE02_CAPABILITIES;
+        output->Capabilities = KML_PHASE04_CAPABILITIES;
         output->EchoToken = pingRequest.Token;
     }
 

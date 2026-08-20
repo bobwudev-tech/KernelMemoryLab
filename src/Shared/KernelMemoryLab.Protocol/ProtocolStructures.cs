@@ -120,3 +120,36 @@ public struct PingResponse
     public ulong EchoToken;
 }
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct ReadSingleRequest
+{
+    public CommonRequestHeader Header;
+    public uint TargetProcessId;
+    public uint Size;
+    public ulong Address;
+
+    public static ReadSingleRequest Create(uint targetProcessId, ulong address, uint size) =>
+        new()
+        {
+            Header = CommonRequestHeader.Create<ReadSingleRequest>(),
+            TargetProcessId = targetProcessId,
+            Size = size,
+            Address = address,
+        };
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct WriteSingleRequestHeader
+{
+    public CommonRequestHeader Header;
+    public uint TargetProcessId;
+    public uint Size;
+    public ulong Address;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct WriteSingleResponse
+{
+    public CommonResponseHeader Header;
+}
+

@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.PingClient"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.Target.Tests", "tests\Unit\KernelMemoryLab.Target.Tests\KernelMemoryLab.Target.Tests.csproj", "{A7D2898E-48F4-4613-9722-6EC275CB09AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelMemoryLab.SingleMemoryClient", "tests\ManualVm\KernelMemoryLab.SingleMemoryClient\KernelMemoryLab.SingleMemoryClient.csproj", "{D6C37C6A-7C22-4E3A-AFA7-84D17A9C95D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +52,10 @@ Global
 		{A7D2898E-48F4-4613-9722-6EC275CB09AE}.Debug|x64.Build.0 = Debug|x64
 		{A7D2898E-48F4-4613-9722-6EC275CB09AE}.Release|x64.ActiveCfg = Release|x64
 		{A7D2898E-48F4-4613-9722-6EC275CB09AE}.Release|x64.Build.0 = Release|x64
+		{D6C37C6A-7C22-4E3A-AFA7-84D17A9C95D4}.Debug|x64.ActiveCfg = Debug|x64
+		{D6C37C6A-7C22-4E3A-AFA7-84D17A9C95D4}.Debug|x64.Build.0 = Debug|x64
+		{D6C37C6A-7C22-4E3A-AFA7-84D17A9C95D4}.Release|x64.ActiveCfg = Release|x64
+		{D6C37C6A-7C22-4E3A-AFA7-84D17A9C95D4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

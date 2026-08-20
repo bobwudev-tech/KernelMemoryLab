@@ -14,6 +14,10 @@ internal static class Program
         (nameof(SerializationRoundTrips), SerializationRoundTrips),
         (nameof(DeserializeRejectsWrongSize), DeserializeRejectsWrongSize),
         (nameof(LimitsAndCapabilitiesAreSafe), LimitsAndCapabilitiesAreSafe),
+        (nameof(SingleRequestWireFormatIsStable), SingleRequestWireFormatIsStable),
+        (nameof(SingleResponseRoundTrips), SingleResponseRoundTrips),
+        (nameof(SingleRequestValidationRejectsUnsafeRanges), SingleRequestValidationRejectsUnsafeRanges),
+        (nameof(SingleOperationStatusesAreStable), SingleOperationStatusesAreStable),
     };
 
     private static int Main()
@@ -50,6 +54,9 @@ internal static class Program
         AssertEqual(40, Marshal.SizeOf<GetCapabilitiesResponse>());
         AssertEqual(24, Marshal.SizeOf<PingRequest>());
         AssertEqual(40, Marshal.SizeOf<PingResponse>());
+        AssertEqual(32, Marshal.SizeOf<ReadSingleRequest>());
+        AssertEqual(32, Marshal.SizeOf<WriteSingleRequestHeader>());
+        AssertEqual(16, Marshal.SizeOf<WriteSingleResponse>());
     }
 
     private static void IoControlCodesAreStable()
@@ -123,6 +130,132 @@ internal static class Program
              ProtocolCapabilities.WriteSingle |
              ProtocolCapabilities.ReadBatch |
              ProtocolCapabilities.WriteBatch));
+
+        ProtocolCapabilities phase04Expected =
+            ProtocolConstants.Phase02Capabilities |
+            ProtocolCapabilities.ReadSingle |
+            ProtocolCapabilities.WriteSingle;
+
+        AssertEqual(phase04Expected, ProtocolConstants.Phase04Capabilities);
+        AssertEqual(0x0000000000000307UL, (ulong)ProtocolConstants.Phase04Capabilities);
+        AssertEqual(
+            ProtocolCapabilities.None,
+            ProtocolConstants.Phase04Capabilities &
+            (ProtocolCapabilities.ReadBatch | ProtocolCapabilities.WriteBatch));
+    }
+
+    private static void SingleRequestWireFormatIsStable()
+    {
+        const uint processId = 1234;
+        const ulong address = 0x0000012345678000UL;
+        byte[] payload = [0x11, 0x22, 0x33, 0x44];
+
+        ReadSingleRequest readRequest = ReadSingleRequest.Create(processId, address, 4);
+        byte[] readBuffer = ProtocolSerializer.Serialize(in readRequest);
+        AssertEqual(32, readBuffer.Length);
+        AssertEqual(32u, BinaryPrimitives.ReadUInt32LittleEndian(readBuffer.AsSpan(4, 4)));
+        AssertEqual(processId, BinaryPrimitives.ReadUInt32LittleEndian(readBuffer.AsSpan(16, 4)));
+        AssertEqual(4u, BinaryPrimitives.ReadUInt32LittleEndian(readBuffer.AsSpan(20, 4)));
+        AssertEqual(address, BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.AsSpan(24, 8)));
+
+        byte[] writeBuffer = SingleMemoryProtocol.EncodeWriteRequest(processId, address, payload);
+        AssertEqual(36, writeBuffer.Length);
+        AssertEqual(36u, BinaryPrimitives.ReadUInt32LittleEndian(writeBuffer.AsSpan(4, 4)));
+        AssertEqual(processId, BinaryPrimitives.ReadUInt32LittleEndian(writeBuffer.AsSpan(16, 4)));
+        AssertEqual(4u, BinaryPrimitives.ReadUInt32LittleEndian(writeBuffer.AsSpan(20, 4)));
+        AssertEqual(address, BinaryPrimitives.ReadUInt64LittleEndian(writeBuffer.AsSpan(24, 8)));
+        AssertSequenceEqual(payload, writeBuffer.AsSpan(32));
+
+        WriteSingleMessage decoded = SingleMemoryProtocol.DecodeWriteRequest(writeBuffer);
+        AssertEqual(processId, decoded.Header.TargetProcessId);
+        AssertEqual(address, decoded.Header.Address);
+        AssertSequenceEqual(payload, decoded.Data.Span);
+    }
+
+    private static void SingleResponseRoundTrips()
+    {
+        byte[] data = [0x64, 0x00, 0x00, 0x00];
+        CommonResponseHeader header = new()
+        {
+            ProtocolVersion = ProtocolConstants.CurrentProtocolVersion,
+            OperationStatus = OperationStatus.Success,
+            BytesProcessed = checked((uint)data.Length),
+            DetailStatus = 0,
+        };
+
+        byte[] encoded = SingleMemoryProtocol.EncodeReadResponse(header, data);
+        ReadSingleMessage decoded = SingleMemoryProtocol.DecodeReadResponse(encoded);
+        AssertEqual(OperationStatus.Success, decoded.Header.OperationStatus);
+        AssertEqual(4u, decoded.Header.BytesProcessed);
+        AssertSequenceEqual(data, decoded.Data.Span);
+
+        AssertThrows<InvalidDataException>(() =>
+            SingleMemoryProtocol.DecodeReadResponse(encoded.AsSpan(0, encoded.Length - 1)));
+
+        byte[] malformedWrite = SingleMemoryProtocol.EncodeWriteRequest(
+            1234,
+            0x0000012345678000UL,
+            data);
+        BinaryPrimitives.WriteUInt32LittleEndian(malformedWrite.AsSpan(20, 4), 3u);
+        AssertThrows<InvalidDataException>(() =>
+            SingleMemoryProtocol.DecodeWriteRequest(malformedWrite));
+    }
+
+    private static void SingleRequestValidationRejectsUnsafeRanges()
+    {
+        const uint validPid = 1234;
+        const ulong validAddress = 0x0000012345678000UL;
+
+        AssertEqual(OperationStatus.InvalidPid,
+            SingleMemoryRequestValidator.Validate(0, validAddress, 4));
+        AssertEqual(OperationStatus.InvalidPid,
+            SingleMemoryRequestValidator.Validate(4, validAddress, 4));
+        AssertEqual(OperationStatus.InvalidAddress,
+            SingleMemoryRequestValidator.Validate(validPid, 0, 4));
+        AssertEqual(OperationStatus.InvalidSize,
+            SingleMemoryRequestValidator.Validate(validPid, validAddress, 0));
+        AssertEqual(OperationStatus.InvalidSize,
+            SingleMemoryRequestValidator.Validate(validPid, validAddress, 4_097));
+        AssertEqual(OperationStatus.AddressRangeOverflow,
+            SingleMemoryRequestValidator.Validate(validPid, ulong.MaxValue - 1, 2));
+        AssertEqual(OperationStatus.KernelRangeDenied,
+            SingleMemoryRequestValidator.Validate(
+                validPid,
+                SingleMemoryRequestValidator.MinimumX64KernelAddress,
+                4));
+        AssertEqual(OperationStatus.InvalidAddress,
+            SingleMemoryRequestValidator.Validate(
+                validPid,
+                SingleMemoryRequestValidator.MaximumX64UserAddress + 1,
+                1));
+        AssertEqual(OperationStatus.InvalidAddress,
+            SingleMemoryRequestValidator.Validate(
+                validPid,
+                SingleMemoryRequestValidator.MaximumX64UserAddress,
+                2));
+        AssertEqual(OperationStatus.Success,
+            SingleMemoryRequestValidator.Validate(validPid, validAddress, 4));
+        AssertEqual(OperationStatus.Success,
+            SingleMemoryRequestValidator.Validate(
+                validPid,
+                SingleMemoryRequestValidator.MaximumX64UserAddress,
+                1));
+    }
+
+    private static void SingleOperationStatusesAreStable()
+    {
+        AssertEqual(1u, (uint)OperationStatus.ProtocolMismatch);
+        AssertEqual(8u, (uint)OperationStatus.InvalidRequest);
+        AssertEqual(9u, (uint)OperationStatus.InvalidPid);
+        AssertEqual(10u, (uint)OperationStatus.TargetNotFound);
+        AssertEqual(11u, (uint)OperationStatus.TargetNotAllowed);
+        AssertEqual(12u, (uint)OperationStatus.InvalidAddress);
+        AssertEqual(13u, (uint)OperationStatus.InvalidSize);
+        AssertEqual(14u, (uint)OperationStatus.AddressRangeOverflow);
+        AssertEqual(15u, (uint)OperationStatus.KernelRangeDenied);
+        AssertEqual(16u, (uint)OperationStatus.MemoryNotAccessible);
+        AssertEqual(17u, (uint)OperationStatus.PartialTransfer);
+        AssertEqual(18u, (uint)OperationStatus.TargetExited);
     }
 
     private static void AssertEqual<T>(T expected, T actual)
@@ -130,6 +263,15 @@ internal static class Program
         if (!EqualityComparer<T>.Default.Equals(actual, expected))
         {
             throw new InvalidOperationException($"Expected {expected}, actual {actual}.");
+        }
+    }
+
+    private static void AssertSequenceEqual(ReadOnlySpan<byte> expected, ReadOnlySpan<byte> actual)
+    {
+        if (!expected.SequenceEqual(actual))
+        {
+            throw new InvalidOperationException(
+                $"Expected {Convert.ToHexString(expected)}, actual {Convert.ToHexString(actual)}.");
         }
     }
 
