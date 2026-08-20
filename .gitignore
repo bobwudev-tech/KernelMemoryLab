@@ -1,0 +1,52 @@
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# .NET
+artifacts/
+TestResults/
+
+# C/C++ / WDK
+*.obj
+*.pch
+*.ilk
+*.tlog
+*.lastbuildstate
+*.exp
+*.lib
+
+# Driver build outputs
+*.sys
+*.pdb
+*.cat
+
+# Signing certificates / private keys
+*.pfx
+*.pvk
+*.cer
+*.key
+*.pem
+
+# Crash dumps
+*.dmp
+*.mdmp
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -1,0 +1,72 @@
+> [!CAUTION]
+> # KERNEL DRIVER SAFETY RULE — MANDATORY
+>
+> 本專案包含 Windows Kernel-mode Driver。**Coding Agent 不得在任何電腦上執行會載入、安裝、啟動、停止、呼叫或驗證 `.sys` 的操作。**
+>
+> Agent 只允許：
+> - 編輯/建立原始碼與文件
+> - Restore / Build / Compile
+> - Static Analysis / Lint
+> - 不接觸 Driver 的純 User-mode Unit Test
+> - 產生供使用者手動執行的 VM 測試步驟與命令
+>
+> Agent 禁止：
+> - 安裝 / 移除 Driver
+> - Load / Unload `.sys`
+> - 建立或啟動 Kernel Driver Service
+> - 對 Driver 執行 `DeviceIoControl`
+> - Driver Verifier
+> - BCDEdit / TESTSIGNING / Boot 設定修改
+> - Kernel Debugger 操作
+> - 任何可能造成 BSOD、Kernel state 改變或 Windows 啟動設定改變的命令
+>
+> **所有 Driver 實際驗證只能由使用者本人在 Windows 11 VM 手動執行。**
+>
+> 若文件內需要提供上述命令，必須清楚標註：
+> `MANUAL VM ONLY — DO NOT EXECUTE BY AGENT`
+>
+> 本專案 V1 僅允許對受控 User Process (`KernelMemoryLab.Target.exe`) 的 User Virtual Memory 進行讀寫。
+> 嚴禁實作任意 Kernel VA、Physical Memory、CR3/Page Table、Kernel Patch、任意 Process、Security/Anti-cheat bypass 等能力。
+
+
+# KernelMemoryLab — SDD Phase Package
+
+## Goal
+
+Kernel-mode Driver 對受控 User Process (`KernelMemoryLab.Target.exe`) 的 User Virtual Memory 執行：
+
+```text
+Single Read
+Single Write
+Batch Read
+Batch Write
+```
+
+最終成品：
+
+```text
+KernelMemoryLab.Driver.sys
+KernelMemoryLab.Target.exe
+KernelMemoryLab.Controller.exe
+```
+
+## Development order
+
+```text
+00 Project Contract
+01 Solution & Safety
+02 Protocol & PING
+03 Target.exe
+04 Single R/W
+05 Batch R/W
+06 Controller.exe + API
+07 Driver Package + Manual Install Guide
+08 Manual VM Verification
+09 Release + API Docs
+```
+
+## VM policy
+
+Coding Agent 不操作 VM，也不執行任何 Driver Integration Test。
+
+Driver 的安裝、載入、IOCTL 驗證、Verifier 等均由使用者本人在 Windows 11 VM 手動完成。
