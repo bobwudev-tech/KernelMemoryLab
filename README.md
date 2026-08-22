@@ -29,7 +29,7 @@
 > 嚴禁實作任意 Kernel VA、Physical Memory、CR3/Page Table、Kernel Patch、任意 Process、Security/Anti-cheat bypass 等能力。
 
 
-# KernelMemoryLab — SDD Phase Package
+# KernelMemoryLab V1
 
 ## Goal
 
@@ -49,6 +49,75 @@ KernelMemoryLab.Driver.sys
 KernelMemoryLab.Target.exe
 KernelMemoryLab.Controller.exe
 ```
+
+## Architecture
+
+```text
+KernelMemoryLab.Controller.exe
+    -> KernelMemoryApi / V1 IOCTL protocol
+        -> KernelMemoryLab.Driver.sys (KMDF)
+            -> validated user virtual memory only
+                -> KernelMemoryLab.Target.exe
+                   Health / Mana / Gold / PositionX / PositionY
+```
+
+Controller 不建立任意 raw memory capability。Driver 只接受目前存活且 image basename 精確符合 `KernelMemoryLab.Target.exe` 的 PID，並在 access 前驗證 user range、size、overflow、process identity 與 lifecycle。
+
+## V1 scope and safety limitations
+
+允許：
+
+- 對受控 `KernelMemoryLab.Target.exe` user virtual memory 執行 single read/write。
+- 對同一受控 PID 執行 bounded batch read/write。
+- `Int32`、`Int64`、`Float32` 實驗資料。
+- 規格化且 bounded 的錯誤案例。
+
+不包含：
+
+- 任意 process access。
+- 任意 kernel virtual memory 或 physical memory access。
+- CR3/page-table manipulation、kernel patch 或 code injection。
+- protected-process、anti-cheat 或 security bypass。
+
+## Versions and limits
+
+| Item | V1 value |
+|---|---|
+| Driver | `0.5.0.0` |
+| Protocol | `1.0` |
+| Platform | Windows 11 x64 / KMDF |
+| Capability mask | `0x0000000000000F07` |
+| Maximum single item | `4096` bytes |
+| Maximum batch | `128` items |
+| Maximum aggregate payload | `524288` bytes |
+
+## Build and package
+
+需求：Visual Studio C++/.NET Desktop build tools、相容 Windows Driver Kit，以及 .NET 8 SDK。
+
+```powershell
+.\scripts\build.ps1 -Configuration Debug
+.\scripts\build.ps1 -Configuration Release
+.\scripts\package.ps1 -Configuration Release
+.\scripts\release.ps1 -ReleaseStatus ReleaseCandidate
+```
+
+這些腳本只執行 restore/build/static packaging/copy/hash；不得加入 Driver install、service control、device access、IOCTL、boot change 或 reboot。`release.ps1 -ReleaseStatus Final` 只有在 `Verification_Report.md` 的 Phase 08 與 Final Release Gate 都為 PASS 時才會產出 final channel。
+
+## Documentation index
+
+| Document | Purpose |
+|---|---|
+| `docs/Protocol_V1.md` | Wire format、IOCTL、limits 與 status semantics |
+| `docs/Target_Memory_Layout.md` | 五個 unmanaged variables 的固定 layout |
+| `docs/API_Usage.md` | `KernelMemoryApi` 逐 API 使用指南 |
+| `docs/Driver_Install.md` | Windows 11 VM 手動安裝、移除與 troubleshooting |
+| `docs/VM_Test_Checklist.md` | Phase 08 T01–T10 人工驗證與 failure handoff |
+| `docs/Verification_Report.md` | Agent/VM evidence、scope assertion 與 final release gate |
+
+## Current release status
+
+Agent Build、static analysis 與純 User-mode tests 已通過。使用者尚未提供 Phase 08 Windows 11 VM integration results，因此目前只能產出 **release candidate**；不能宣告 final release PASS。
 
 ## Development order
 
@@ -134,3 +203,7 @@ Phase 07 加入 Windows 11 x64 primitive-driver INF 與 build/package-only pipel
 ## Phase 08 Manual VM integration baseline
 
 Phase 08 的 T01–T10 Windows 11 x64 VM 驗證順序、預期結果、證據格式、bounded negative cases、optional Driver Verifier 與 failure handoff 位於 `docs/VM_Test_Checklist.md`。所有真實 Driver integration 結果在使用者回填之前均維持 `NOT RUN` / `PENDING MANUAL VM VERIFICATION`。
+
+## Phase 09 API, release and verification report
+
+Phase 09 完成逐 API guide、final scope assertion、release manifest、`VERSION.txt` 與 Verification Report。`scripts/release.ps1` 會驗證 Phase 07 Release package hashes/signature presence/version，再建立 `Driver/`、`Apps/`、`Docs/` 的 release tree；在 Phase 08 PASS 前只允許 release-candidate 狀態。
