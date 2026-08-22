@@ -130,3 +130,7 @@ UI 透過 `KernelMemoryApi` 呼叫可替換的 `IDriverTransport`，不直接組
 Phase 07 加入 Windows 11 x64 primitive-driver INF 與 build/package-only pipeline。`scripts/package.ps1` 只會 Build、複製 SYS/INF/CAT/public CER（Debug 另含 PDB）、Controller/Target、文件並產生 SHA-256 manifest；腳本不含安裝、service control、device access、boot change 或 reboot。
 
 完整的 VM snapshot、test-signing、certificate trust、安裝、service/device 確認、移除、復原與 troubleshooting 流程位於 `docs/Driver_Install.md`。其中所有 Driver/Boot 命令均為 `MANUAL VM ONLY — DO NOT EXECUTE BY AGENT`。
+
+## Phase 08 Manual VM integration baseline
+
+Phase 08 的 T01–T10 Windows 11 x64 VM 驗證順序、預期結果、證據格式、bounded negative cases、optional Driver Verifier 與 failure handoff 位於 `docs/VM_Test_Checklist.md`。所有真實 Driver integration 結果在使用者回填之前均維持 `NOT RUN` / `PENDING MANUAL VM VERIFICATION`。

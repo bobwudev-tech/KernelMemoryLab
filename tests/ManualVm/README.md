@@ -10,6 +10,8 @@ Phase 06 uses the real `KernelMemoryLab.Controller.exe` only during the user-run
 
 Phase 07 packages the primitive Driver INF/SYS/CAT and documents manual VM installation and removal in `../../docs/Driver_Install.md`.
 
+Phase 08 consolidates the ordered T01-T10 user-run integration procedure and result handoff in `../../docs/VM_Test_Checklist.md`.
+
 The Coding Agent may compile that project, but must never execute it because it opens the real device and calls `DeviceIoControl`.
 
 Any future driver integration procedure placed here must begin with:
