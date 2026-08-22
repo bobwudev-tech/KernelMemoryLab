@@ -1,0 +1,50 @@
+; KernelMemoryLab primitive KMDF driver package for Windows 11 x64 lab VMs.
+; This package installs a demand-start kernel service without a PnP devnode.
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %KML.Provider%
+DriverVer   = 08/22/2026,0.5.0.0
+CatalogFile = KernelMemoryLab.Driver.cat
+PnpLockdown = 1
+
+[DefaultInstall.NTamd64]
+CopyFiles = KML.DriverFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService = %KML.ServiceName%,,KML.ServiceInstall
+
+[DefaultInstall.NTamd64.Wdf]
+KmdfService = KernelMemoryLab,KML.WdfSection
+
+[KML.ServiceInstall]
+DisplayName   = %KML.ServiceDisplayName%
+Description   = %KML.ServiceDescription%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %13%\KernelMemoryLab.Driver.sys
+
+[KML.WdfSection]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[DestinationDirs]
+KML.DriverFiles = 13
+
+[KML.DriverFiles]
+KernelMemoryLab.Driver.sys
+
+[SourceDisksNames]
+1 = %KML.DiskName%,,,
+
+[SourceDisksFiles]
+KernelMemoryLab.Driver.sys = 1
+
+[Strings]
+KML.Provider           = "KernelMemoryLab"
+KML.ServiceName        = "KernelMemoryLab"
+KML.ServiceDisplayName = "KernelMemoryLab Driver"
+KML.ServiceDescription = "Controlled user-process memory laboratory driver"
+KML.DiskName           = "KernelMemoryLab Driver Package"

@@ -45,12 +45,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <TargetName>KernelMemoryLab.Driver</TargetName>
+    <!-- package.ps1 applies an in-memory test signature after compilation. -->
+    <SignMode>Off</SignMode>
     <!--
       WDK 10.0.28000.0 runs ApiValidator through an unquoted temporary CMD path,
       which fails when the Windows profile path contains CMD metacharacters.
       This project relies on compiler/linker diagnostics instead.
     -->
     <ApiValidator_Enable>false</ApiValidator_Enable>
+    <!--
+      This WDK/VS combination does not contain the x86 InfVerif.dll expected
+      by DPVerifierTask. Inf2Cat signability plus package.ps1's structural INF
+      checks remain enabled and fail the package build on an invalid package.
+    -->
+    <SkipPackageVerification>true</SkipPackageVerification>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -90,6 +98,12 @@
   <ItemGroup>
     <ClInclude Include="KernelMemoryLab.Driver.h" />
     <ClInclude Include="..\..\Shared\KernelMemoryLab.Protocol\include\KernelMemoryLab.Protocol.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="KernelMemoryLab.Driver.inf">
+      <DateStamp>08/22/2026</DateStamp>
+      <TimeStamp>0.5.0.0</TimeStamp>
+    </Inf>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

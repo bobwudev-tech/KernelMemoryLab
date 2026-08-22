@@ -13,6 +13,7 @@ Write-Host "Configuration: $Configuration"
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $solutionPath = Join-Path $repositoryRoot "KernelMemoryLab.sln"
 $vsWherePath = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+$buildTempPath = Join-Path $repositoryRoot "artifacts\build-temp"
 
 if (-not (Test-Path -LiteralPath $solutionPath -PathType Leaf)) {
     throw "Solution not found: $solutionPath"
@@ -21,6 +22,13 @@ if (-not (Test-Path -LiteralPath $solutionPath -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $vsWherePath -PathType Leaf)) {
     throw "Visual Studio Installer discovery tool was not found: $vsWherePath"
 }
+
+# Keep WDK/MSBuild tracking and response files inside the repository. This is
+# required in managed workspaces that intentionally deny writes to the user
+# profile's default temporary directory.
+New-Item -ItemType Directory -Path $buildTempPath -Force | Out-Null
+$env:TEMP = $buildTempPath
+$env:TMP = $buildTempPath
 
 $msBuildPath = & $vsWherePath `
     -latest `

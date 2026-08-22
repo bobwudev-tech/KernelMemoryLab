@@ -124,3 +124,9 @@ Wire format 與語意記錄於 `docs/Protocol_V1.md`，純 User-mode parser／se
 Phase 06 將 Controller shell 完成為 WPF 操作介面，提供 connection/protocol/Driver 狀態、固定 Target PID/address 輸入、typed single read/write、五列 batch read/write，以及具 operation、Driver status、Win32 error、PID 與 timestamp 的錯誤資訊。
 
 UI 透過 `KernelMemoryApi` 呼叫可替換的 `IDriverTransport`，不直接組 raw IOCTL buffer。API 說明位於 `docs/API_Usage.md`；純 fake-transport tests 位於 `tests/Unit/KernelMemoryLab.Controller.Tests`。真實 Controller/Driver acceptance 只能由使用者依 `tests/ManualVm/Phase06_Controller_API_Checklist.md` 在 Windows 11 VM 手動驗證。
+
+## Phase 07 Driver package baseline
+
+Phase 07 加入 Windows 11 x64 primitive-driver INF 與 build/package-only pipeline。`scripts/package.ps1` 只會 Build、複製 SYS/INF/CAT/public CER（Debug 另含 PDB）、Controller/Target、文件並產生 SHA-256 manifest；腳本不含安裝、service control、device access、boot change 或 reboot。
+
+完整的 VM snapshot、test-signing、certificate trust、安裝、service/device 確認、移除、復原與 troubleshooting 流程位於 `docs/Driver_Install.md`。其中所有 Driver/Boot 命令均為 `MANUAL VM ONLY — DO NOT EXECUTE BY AGENT`。

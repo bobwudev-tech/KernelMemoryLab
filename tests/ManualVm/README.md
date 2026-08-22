@@ -8,6 +8,8 @@ Phase 05 includes a manual-only batch user-memory transport harness in `KernelMe
 
 Phase 06 uses the real `KernelMemoryLab.Controller.exe` only during the user-run VM procedure.
 
+Phase 07 packages the primitive Driver INF/SYS/CAT and documents manual VM installation and removal in `../../docs/Driver_Install.md`.
+
 The Coding Agent may compile that project, but must never execute it because it opens the real device and calls `DeviceIoControl`.
 
 Any future driver integration procedure placed here must begin with:
